@@ -24,6 +24,7 @@
 #include <cstring>
 #include <fstream>
 #include <iostream>
+#include <sstream>
 #include <string>
 #include <vector>
 
@@ -72,37 +73,13 @@ uint32_t do_RVA_2_FileOffset(RVA_2_FileOffset_node *sections, uint32_t RVA) {
   return 0;
 }
 
-// A simple sprintf replacement
-int cprintf(char *dest, const char *mask, int n) {
-  int len = n <= 9       ? 1
-            : n <= 99    ? 2
-            : n <= 999   ? 3
-            : n <= 9999  ? 4
-            : n <= 99999 ? 5
-                         : 6;
-  char *outp = dest;
-  char c;
-  while ((c = *mask++)) {
-    if (c == '%') {
-      outp += len;
-      int x = 0;
-      while (len-- > 0) {
-        *(outp - ++x) = '0' + n % 10;
-        n /= 10;
-      }
-    } else {
-      *outp++ = c;
-    }
-  }
-  return outp - dest;
-}
-
 // Process a single PE file (DLL) and dump its export
 int parse_pe(const std::string &filename, std::ifstream &hFile,
              std::ofstream &hOut, bool compact) {
   char buf[1024], dll_name[80], pub_name[80];
   int current_mod = MOD_NO;
   char c, *cur1, *cur2;
+  std::stringstream ss;
   RVA_2_FileOffset export_dir;
   RVA_2_FileOffset_node *sections = nullptr, **current_node = &sections;
   uint32_t dll_name_len, aux, i, file_pos, size_of_optional_header, is_PE32plus,
@@ -231,22 +208,17 @@ int parse_pe(const std::string &filename, std::ifstream &hFile,
     hFile.read(reinterpret_cast<char *>(&ordinal), 2);
     ordinals_array += 2;
     pub_name_len = std::strlen(pub_name);
-    if (!pub_name_len)
-      pub_name_len = cprintf(pub_name, "ord.%", ordinal + ordinal_base);
+    if (!pub_name_len) {
+      ss.str(""); // Clear the stringstream
+      ss << "ord." << (ordinal + ordinal_base);
+      std::strcpy(pub_name, ss.str().c_str());
+      pub_name_len = ss.str().length();
+    }
     if (!compact) {
       // ; DLLNAME.NAME ord.#
-      buf[0] = ';';
-      buf[1] = ' ';
-      memcpy(buf + 2, dll_name, dll_name_len);
-      buf[2 + dll_name_len] = '.';
-      if (pub_name_len) {
-        memcpy(&buf[3 + dll_name_len], pub_name, pub_name_len);
-        aux = cprintf(&buf[3 + dll_name_len + pub_name_len], " ord.%\n",
-                      ordinal + ordinal_base);
-      } else {
-        aux = cprintf(&buf[3 + dll_name_len], "#%\n", ordinal + ordinal_base);
-      }
-      hOut.write(buf, 3 + dll_name_len + pub_name_len + aux);
+      ss.str(""); // Clear the stringstream
+      ss << "; " << dll_name << '.' << pub_name << " ord." << (ordinal + ordinal_base) << '\n';
+      hOut << ss.str();
 
       // Get the symbol's RVA (just to check if it's a forwarder chain)
       if (ordinal & 0x80000000)
@@ -260,18 +232,16 @@ int parse_pe(const std::string &filename, std::ifstream &hFile,
         if (!file_pos)
           return ERR_BAD_FORMAT;
         hFile.seekg(file_pos, std::ios::beg);
-        memcpy(buf, "; -> ", 5);
-        hFile.read(buf + 5, 512);
-        buf[hFile.gcount() + 5] = 0;
-        aux = std::strlen(buf + 5);
-        if (!aux) {
-          buf[5] = '.';
-          buf[6] = '.';
-          buf[7] = '.';
-          aux = 3;
+        ss.str(""); // Clear the stringstream
+        ss << "; -> ";
+        hFile.read(buf, 512);
+        buf[hFile.gcount()] = 0;
+        ss << buf;
+        if (ss.str().length() <= 5) {
+          ss << "...";
         }
-        buf[aux + 5] = '\n';
-        hOut.write(buf, aux + 6);
+        ss << '\n';
+        hOut << ss.str();
       }
     }
 
