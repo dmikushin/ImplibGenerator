@@ -1,4 +1,0 @@
-LIBRARY ImpGen
-EXPORTS
-	GetX86ImpSectionBuilder
-	GetX64ImpSectionBuilder

@@ -1,4 +1,0 @@
-LIBRARY ImpLibFix
-EXPORTS
-	GetMaxNameLength
-	RenameImpLibObjects

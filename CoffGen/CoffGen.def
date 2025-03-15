@@ -1,5 +1,0 @@
-LIBRARY CoffGen
-EXPORTS
-    GetX86CoffFactory
-    GetX64CoffFactory
-    GetIA64CoffFactory

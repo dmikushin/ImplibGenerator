@@ -1,4 +1,0 @@
-LIBRARY LibGenHelper
-EXPORTS
-	CreateX86ImpLibBuilder
-	CreateX64ImpLibBuilder
