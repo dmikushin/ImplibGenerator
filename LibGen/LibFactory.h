@@ -5,7 +5,7 @@
 
 namespace Sora
 {
-    extern "C" ILibraryBuilder* WINAPI CreateLibraryBuilder();
+    extern "C" ILibraryBuilder* CreateLibraryBuilder();
 };
 
 #endif

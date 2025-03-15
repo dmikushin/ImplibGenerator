@@ -5,11 +5,11 @@
 
 namespace Sora {
     //not include the \0
-    extern "C" int WINAPI GetMaxNameLength();
+    extern "C" int GetMaxNameLength();
 
     //return: how many members renamed.
     //first link member and second link member and longname member won't be renamed
-    extern "C" int WINAPI RenameImpLibObjects(LPCSTR szNewName, PBYTE pData, int nDataLen);
+    extern "C" int RenameImpLibObjects(LPCSTR szNewName, PBYTE pData, int nDataLen);
 };
 
 #endif

@@ -73,7 +73,7 @@ namespace Sora
                 m_libBuilder->AddObject(szMemName, nuldesc);
             }
 
-            void WINAPI Dispose()
+            void Dispose()
             {
                 std::vector<ICoffBuilder*>::iterator i, iend;
                 i = m_todispose.begin();
@@ -83,28 +83,28 @@ namespace Sora
                 delete this;
             }
 
-            void WINAPI AddImportFunctionByName(LPCSTR szImpName, LPCSTR szFuncName, LPCSTR szDllExpName)
+            void AddImportFunctionByName(LPCSTR szImpName, LPCSTR szFuncName, LPCSTR szDllExpName)
             {
                 ICoffBuilder* impMember = CreateObject();
                 m_secBuilder->BuildImportByNameThunk(m_dllName.c_str(), szImpName, szFuncName, szDllExpName, impMember);
                 m_libBuilder->AddObject(m_memName.c_str(), impMember);
             }
 
-            void WINAPI AddImportFunctionByOrdinal(LPCSTR szImpName, LPCSTR szFuncName, int nOrdinal)
+            void AddImportFunctionByOrdinal(LPCSTR szImpName, LPCSTR szFuncName, int nOrdinal)
             {
                 ICoffBuilder* impMember = CreateObject();
                 m_secBuilder->BuildImportByOrdinalThunk(m_dllName.c_str(), szImpName, szFuncName, nOrdinal, impMember);
                 m_libBuilder->AddObject(m_memName.c_str(), impMember);
             }
 
-            void WINAPI AddImportFunctionByNameWithHint(LPCSTR szImpName, LPCSTR szFuncName, LPCSTR szImportName, int nOrdinal)
+            void AddImportFunctionByNameWithHint(LPCSTR szImpName, LPCSTR szFuncName, LPCSTR szImportName, int nOrdinal)
             {
                 ICoffBuilder* impMember = CreateObject();
                 m_secBuilder->BuildImportThunk(m_dllName.c_str(), szImpName, szFuncName, szImportName, nOrdinal, impMember);
                 m_libBuilder->AddObject(m_memName.c_str(), impMember);
             }
 
-            void WINAPI Build()
+            void Build()
             {
                 ICoffBuilder* nullThunk = CreateObject();
                 m_secBuilder->BuildNullThunk(m_dllName.c_str(), nullThunk);
@@ -113,23 +113,23 @@ namespace Sora
                 m_libBuilder->FillOffsets();
             }
 
-            void WINAPI GetRawData(PBYTE buf)
+            void GetRawData(PBYTE buf)
             {
                 m_libBuilder->GetRawData(buf);
             }
 
-            int WINAPI GetDataLength()
+            int GetDataLength()
             {
                 return m_libBuilder->GetDataLength();
             }
     };
 
-    extern "C" IImportLibraryBuilder* WINAPI CreateX86ImpLibBuilder(LPCSTR szDllName, LPCSTR szMemberName)
+    extern "C" IImportLibraryBuilder* CreateX86ImpLibBuilder(LPCSTR szDllName, LPCSTR szMemberName)
     {
         return new CImportLibraryBuilder<ArchX86>(szDllName, szMemberName);
     }
 
-    extern "C" IImportLibraryBuilder* WINAPI CreateX64ImpLibBuilder(LPCSTR szDllName, LPCSTR szMemberName)
+    extern "C" IImportLibraryBuilder* CreateX64ImpLibBuilder(LPCSTR szDllName, LPCSTR szMemberName)
     {
         return new CImportLibraryBuilder<ArchX64>(szDllName, szMemberName);
     }

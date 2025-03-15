@@ -152,13 +152,13 @@ namespace Sora {
             }
     };
 
-    int WINAPI RenameImpLibObjects(LPCSTR szNewName, PBYTE pData, int nDataLen)
+    int RenameImpLibObjects(LPCSTR szNewName, PBYTE pData, int nDataLen)
     {
         ImpLibRenameImpl impl(pData, nDataLen);
         return impl.DoWork(szNewName);
     }
 
-    int WINAPI GetMaxNameLength()
+    int GetMaxNameLength()
     {
         return sizeof(((PIMAGE_ARCHIVE_MEMBER_HEADER)0)->Name);
     }

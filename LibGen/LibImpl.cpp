@@ -80,7 +80,7 @@ namespace Sora
                 return r;
             }
         public:
-            bool WINAPI SetMemberOffset(ICoffBuilder* member, int offset)
+            bool SetMemberOffset(ICoffBuilder* member, int offset)
             {
                 OffsetCollection::iterator x = m_offsets.find(member);
                 if (x != m_offsets.end()) {
@@ -90,7 +90,7 @@ namespace Sora
                     return false;
             }
 
-            void WINAPI AppendMember(ICoffBuilder* member)
+            void AppendMember(ICoffBuilder* member)
             {
                 m_offsets.emplace( member, 0 );
 
@@ -115,7 +115,7 @@ namespace Sora
             }
 
         public:
-            void WINAPI GetRawData(PBYTE buf)
+            void GetRawData(PBYTE buf)
             {
                 PIMAGE_ARCHIVE_MEMBER_HEADER pHeader;
                 *(LPVOID*)&pHeader = buf;
@@ -167,7 +167,7 @@ namespace Sora
                 }
             }
 
-            int WINAPI GetDataLength()
+            int GetDataLength()
             {
                 int r = 0;
                 r += sizeof(IMAGE_ARCHIVE_MEMBER_HEADER);
@@ -186,7 +186,7 @@ namespace Sora
     class CSecondLinkMemberBuilder : virtual public CBaseLinkMemberBuilder
     {
         public:
-            void WINAPI GetRawData(PBYTE buf)
+            void GetRawData(PBYTE buf)
             {
                 PIMAGE_ARCHIVE_MEMBER_HEADER mh;
                 *(LPVOID*)&mh = buf;
@@ -238,7 +238,7 @@ namespace Sora
                 }
             }
 
-            int WINAPI GetDataLength()
+            int GetDataLength()
             {
                 int r = 0;
                 r += sizeof(IMAGE_ARCHIVE_MEMBER_HEADER);
@@ -258,12 +258,12 @@ namespace Sora
 
     class CDoubleLinkMemberBuilder : public CFirstLinkMemberBuilder, public CSecondLinkMemberBuilder
     {
-        int WINAPI GetDataLength()
+        int GetDataLength()
         {
             throw std::logic_error("Not clear which to call");
         }
 
-        void WINAPI GetRawData(PBYTE buf)
+        void GetRawData(PBYTE buf)
         {
             throw std::logic_error("Not clear which to call");
         }
@@ -296,12 +296,12 @@ namespace Sora
                 }
             }
         public:
-            void WINAPI Dispose()
+            void Dispose()
             {
                 delete this;
             }
 
-            void WINAPI GetRawData(PBYTE buf)
+            void GetRawData(PBYTE buf)
             {
                 PBYTE pBufBegin = buf;
 
@@ -333,24 +333,24 @@ namespace Sora
                 }
             }
 
-            int WINAPI GetDataLength()
+            int GetDataLength()
             {
                 return CalcSizeOrFillOffsets(false);
             }
 
-            void WINAPI AddObject(LPCSTR szName, ICoffBuilder* cb)
+            void AddObject(LPCSTR szName, ICoffBuilder* cb)
             {
 				cb->PushRelocs();
                 m_members.push_back( std::make_pair(std::string(szName), cb) );
                 m_linkMember.AppendMember(cb);
             }
 
-            void WINAPI FillOffsets()
+            void FillOffsets()
             {
                 CalcSizeOrFillOffsets(true);
             }
 
-            int WINAPI CalcSizeOrFillOffsets(bool bFillOffset)
+            int CalcSizeOrFillOffsets(bool bFillOffset)
             {
                 int curPos = 0;
 
@@ -381,7 +381,7 @@ namespace Sora
             }
     };
 
-    extern "C" ILibraryBuilder* WINAPI CreateLibraryBuilder()
+    extern "C" ILibraryBuilder* CreateLibraryBuilder()
     {
         return new CLibraryBuilder;
     }

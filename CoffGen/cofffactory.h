@@ -5,9 +5,9 @@
 
 namespace Sora {
     extern "C" {
-        ICoffFactory* WINAPI GetX86CoffFactory();
-        ICoffFactory* WINAPI GetX64CoffFactory();
-        ICoffFactory* WINAPI GetIA64CoffFactory();
+        ICoffFactory* GetX86CoffFactory();
+        ICoffFactory* GetX64CoffFactory();
+        ICoffFactory* GetIA64CoffFactory();
     }
 };
 

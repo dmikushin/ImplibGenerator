@@ -68,7 +68,7 @@ namespace Sora
         protected:
             virtual ~CDispose() = 0 { }
         public:
-            void WINAPI Dispose() {
+            void Dispose() {
                 delete this;
             }
     };
@@ -77,12 +77,12 @@ namespace Sora
     class CCoffFactory : public ICoffFactory
     {
         public:
-            ICoffBuilder* WINAPI CreateCoffBuilder() { return new CCoffBuilder<Arch>(); }
-            ISectionBuilder* WINAPI CreateSectionBuilder() { return new CSectionBuilder<Arch>(); }
-            ISymbolTableBuilder* WINAPI CreateSymbolTableBuilder() { return new CSymbolTableBuilder<Arch>(); }
-            IStringTableBuilder* WINAPI CreateStringTableBuilder() { return new CStringTableBuilder<Arch>(); }
-            IRelocatableVar* WINAPI CreateRelocatableVar() { return new CRelocatableVar<Arch>(); }
-            IRelocationTableBuilder* WINAPI CreateRelocationTableBuilder() { return new CRelocationTableBuilder<Arch>(); }
+            ICoffBuilder* CreateCoffBuilder() { return new CCoffBuilder<Arch>(); }
+            ISectionBuilder* CreateSectionBuilder() { return new CSectionBuilder<Arch>(); }
+            ISymbolTableBuilder* CreateSymbolTableBuilder() { return new CSymbolTableBuilder<Arch>(); }
+            IStringTableBuilder* CreateStringTableBuilder() { return new CStringTableBuilder<Arch>(); }
+            IRelocatableVar* CreateRelocatableVar() { return new CRelocatableVar<Arch>(); }
+            IRelocationTableBuilder* CreateRelocationTableBuilder() { return new CRelocationTableBuilder<Arch>(); }
 
             static CCoffFactory<Arch> Instance;
     };
@@ -91,9 +91,9 @@ namespace Sora
     template<typename Arch> CCoffFactory<Arch> CCoffFactory<Arch>::Instance;
 
     extern "C" {
-        ICoffFactory* WINAPI GetX86CoffFactory() { return &CCoffFactory<ArchX86>::Instance; }
-        ICoffFactory* WINAPI GetX64CoffFactory() { return &CCoffFactory<ArchX64>::Instance; }
-        ICoffFactory* WINAPI GetIA64CoffFactory() { return &CCoffFactory<ArchIA64>::Instance; }
+        ICoffFactory* GetX86CoffFactory() { return &CCoffFactory<ArchX86>::Instance; }
+        ICoffFactory* GetX64CoffFactory() { return &CCoffFactory<ArchX64>::Instance; }
+        ICoffFactory* GetIA64CoffFactory() { return &CCoffFactory<ArchIA64>::Instance; }
     };
 
     template<typename Arch>
@@ -105,7 +105,7 @@ namespace Sora
             ISymbolTableBuilder* m_symbolTable;
             IStringTableBuilder* m_stringTable;
         public:
-            int WINAPI AppendSection(ISectionBuilder* p)
+            int AppendSection(ISectionBuilder* p)
             {
                 m_sections.push_back(p);
                 p->SetSectionIndex(m_sections.size()); //1-based
@@ -120,7 +120,7 @@ namespace Sora
                 m_symbolTable->SetStringTable(m_stringTable);
             }
 
-            WINAPI ~CCoffBuilder()
+            ~CCoffBuilder()
             {
                 Sections::iterator i, iend;
                 for(i = m_sections.begin(), iend = m_sections.end();
@@ -133,17 +133,17 @@ namespace Sora
                 m_stringTable->Dispose();
             }
 
-            IStringTableBuilder* WINAPI GetStringTableBuilder()
+            IStringTableBuilder* GetStringTableBuilder()
             {
                 return m_stringTable;
             }
 
-            ISymbolTableBuilder* WINAPI GetSymbolTableBuilder()
+            ISymbolTableBuilder* GetSymbolTableBuilder()
             {
                 return m_symbolTable;
             }
 
-            void WINAPI PushRelocs()
+            void PushRelocs()
             {
                 Sections::iterator i, iend;
                 for(i = m_sections.begin(), iend = m_sections.end();
@@ -153,7 +153,7 @@ namespace Sora
                 }
             }
 
-            int WINAPI GetDataLength()
+            int GetDataLength()
             {
                 Sections::iterator i, iend;
                 int len = 0;
@@ -178,7 +178,7 @@ namespace Sora
                 return len;
             }
 
-            void WINAPI GetRawData(PBYTE p)
+            void GetRawData(PBYTE p)
             {
                 PBYTE sp = p;
 
@@ -281,12 +281,12 @@ namespace Sora
                 m_relocTable = CCoffFactory<Arch>::Instance.CreateRelocationTableBuilder();
             }
 
-            WINAPI ~CSectionBuilder()
+            ~CSectionBuilder()
             {
                 m_relocTable->Dispose();
             }
 
-            void WINAPI SetName(LPCSTR p)
+            void SetName(LPCSTR p)
             {
                 int pl = lstrlenA(p);
                 if (pl >= IMAGE_SIZEOF_SHORT_NAME) //no long name support
@@ -295,17 +295,17 @@ namespace Sora
                     lstrcpyA(m_name, p);
             }
 
-            void WINAPI SetSectionIndex(int secIndex)
+            void SetSectionIndex(int secIndex)
             {
                 m_secIndex = secIndex;
             }
 
-            int WINAPI GetSectionIndex()
+            int GetSectionIndex()
             {
                 return m_secIndex;
             }
 
-            void WINAPI AppendData(LPCBYTE pBuf, int len, IRelocatableVar* aReloc[], int relocCount)
+            void AppendData(LPCBYTE pBuf, int len, IRelocatableVar* aReloc[], int relocCount)
             {
                 int beginPos = m_buf.size();
                 m_buf.insert(m_buf.end(), pBuf, pBuf + len);
@@ -315,17 +315,17 @@ namespace Sora
                 }
             }
 
-            void WINAPI SetCharacteristics(DWORD p)
+            void SetCharacteristics(DWORD p)
             {
                 m_chara = p;
             }
 
-            int WINAPI GetHeaderLength()
+            int GetHeaderLength()
             {
                 return sizeof(IMAGE_SECTION_HEADER);
             }
 
-            DWORD WINAPI GetRawCharacteristic(DWORD c)
+            DWORD GetRawCharacteristic(DWORD c)
             {
                 return
                       (c & SECH_CODE ? IMAGE_SCN_CNT_CODE : 0)
@@ -343,12 +343,12 @@ namespace Sora
                     | (c & SECH_COMDAT ? IMAGE_SCN_LNK_COMDAT : 0);
             }
 
-            DWORD WINAPI GetRawCharacteristic()
+            DWORD GetRawCharacteristic()
             {
                 return GetRawCharacteristic(m_chara);
             }
 
-            void WINAPI GetRawHeader(PBYTE p, DWORD rawOffset)
+            void GetRawHeader(PBYTE p, DWORD rawOffset)
             {
                 IMAGE_SECTION_HEADER* pHeader = (IMAGE_SECTION_HEADER*) p;
                 ZeroMemory(pHeader, sizeof(*pHeader));
@@ -366,14 +366,14 @@ namespace Sora
                 pHeader->Characteristics = GetRawCharacteristic(m_chara);
             }
 
-            int WINAPI GetDataLength()
+            int GetDataLength()
             {
                 int r = m_buf.size() + m_relocTable->GetDataLength();
                 r += AdjustAlign(0, &_outArg);
                 return r;
             }
 
-            void WINAPI GetRawData(PBYTE p)
+            void GetRawData(PBYTE p)
             {
                 std::copy(m_buf.begin(), m_buf.end(), p);
                 p += m_buf.size();
@@ -393,7 +393,7 @@ namespace Sora
                 m_relocTable->GetRawData(p);
             }
 
-            void WINAPI PushRelocs(ISymbolTableBuilder* table)
+            void PushRelocs(ISymbolTableBuilder* table)
             {
                 //std::string tname(m_name, m_name + 8);
                 //table->AddSymbol(this, 0, tname.c_str(), SYST_STATIC, 0);
@@ -410,23 +410,23 @@ namespace Sora
                         ZeroMemory(&u, sizeof(u));
                     }
 
-                    int WINAPI GetDataLength()
+                    int GetDataLength()
                     {
                         return sizeof(u);
                     }
 
-                    void WINAPI GetRawData(PBYTE p)
+                    void GetRawData(PBYTE p)
                     {
                         *(PIMAGE_AUX_SYMBOL)p = u;
                     }
 
-                    void WINAPI Dispose()
+                    void Dispose()
                     {
                         delete this;
                     }
             };
 
-            ISectionAuxSymbol* WINAPI CreateAuxSymbol(ISectionBuilder* associatedSection, SectionComdat selection)
+            ISectionAuxSymbol* CreateAuxSymbol(ISectionBuilder* associatedSection, SectionComdat selection)
             {
                 SecAuxSym* r = new SecAuxSym();
                 r->u.Section.Length = GetDataLength();
@@ -466,7 +466,7 @@ namespace Sora
     {
             std::vector<CHAR> m_buf;
         public:
-            int WINAPI AppendString(LPCSTR p)
+            int AppendString(LPCSTR p)
             {
                 int sl = lstrlenA(p);
                 int r = m_buf.size() + sizeof(DWORD);
@@ -474,17 +474,17 @@ namespace Sora
                 return r;
             }
 
-            LPCSTR WINAPI GetString(int offset)
+            LPCSTR GetString(int offset)
             {
                 return &m_buf[offset - sizeof(DWORD)];
             }
 
-            int WINAPI GetDataLength()
+            int GetDataLength()
             {
                 return m_buf.size() + sizeof(DWORD);
             }
 
-            void WINAPI GetRawData(PBYTE p)
+            void GetRawData(PBYTE p)
             {
                 DWORD* pLen = (DWORD*) p;
                 *pLen = GetDataLength();
@@ -500,12 +500,12 @@ namespace Sora
             std::vector<IMAGE_SYMBOL> m_buf;
             IStringTableBuilder* m_strTable;
         public:
-            void WINAPI SetStringTable(IStringTableBuilder* t)
+            void SetStringTable(IStringTableBuilder* t)
             {
                 m_strTable = t;
             }
 
-            int WINAPI FindSymbol(LPCSTR name)
+            int FindSymbol(LPCSTR name)
             {
                 int cnt = m_buf.size();
                 int i;
@@ -520,7 +520,7 @@ namespace Sora
                 return -1;
             }
 
-            int WINAPI AddSymbol(ISectionBuilder* section, int offset, LPCSTR name, StorageType stype, int auxCnt)
+            int AddSymbol(ISectionBuilder* section, int offset, LPCSTR name, StorageType stype, int auxCnt)
             {
                 int ind = FindSymbol(name);
                 if (ind != -1)
@@ -549,7 +549,7 @@ namespace Sora
                 return m_buf.size() - 1;
             }
 
-            int WINAPI AddAuxData(IHasRawData* d)
+            int AddAuxData(IHasRawData* d)
             {
                 IMAGE_SYMBOL s;
                 if (d->GetDataLength() == sizeof(s)) {
@@ -560,17 +560,17 @@ namespace Sora
                     return -1;
             }
 
-            int WINAPI GetSymbolCount()
+            int GetSymbolCount()
             {
                 return m_buf.size();
             }
 
-            int WINAPI GetDataLength()
+            int GetDataLength()
             {
                 return sizeof(IMAGE_SYMBOL) * GetSymbolCount();
             }
 
-            void WINAPI GetRawData(PBYTE p)
+            void GetRawData(PBYTE p)
             {
                 IMAGE_SYMBOL* pData = (IMAGE_SYMBOL*) p;
                 std::copy(m_buf.begin(), m_buf.end(), pData);
@@ -588,17 +588,17 @@ namespace Sora
                             delete[] m_str;
                     }
 
-                    void WINAPI Dispose()
+                    void Dispose()
                     {
                         delete this;
                     }
 
-                    int WINAPI GetCount()
+                    int GetCount()
                     {
                         return m_cnt;
                     }
 
-                    LPCSTR WINAPI GetString(int nIndex)
+                    LPCSTR GetString(int nIndex)
                     {
                         return m_str[nIndex];
                     }
@@ -637,12 +637,12 @@ namespace Sora
             ISectionBuilder* m_section;
             int m_size;
         public:
-            void WINAPI Offset(int offset)
+            void Offset(int offset)
             {
                 m_val += offset;
             }
 
-            void WINAPI Set(LPCSTR symbol, ISectionBuilder* section, DWORD val, int size, DWORD reloctype)
+            void Set(LPCSTR symbol, ISectionBuilder* section, DWORD val, int size, DWORD reloctype)
             {
                 m_symbol = symbol;
                 m_val = val;
@@ -651,7 +651,7 @@ namespace Sora
                 m_section = section;
             }
 
-            void WINAPI Get(LPCSTR* symbol, ISectionBuilder** section, DWORD* val, int* size, DWORD* reloctype)
+            void Get(LPCSTR* symbol, ISectionBuilder** section, DWORD* val, int* size, DWORD* reloctype)
             {
                 *symbol = m_symbol.c_str();
                 *val = m_val;
@@ -669,7 +669,7 @@ namespace Sora
             std::vector<IMAGE_RELOCATION> m_buf;
 
         public:
-            WINAPI ~CRelocationTableBuilder()
+            ~CRelocationTableBuilder()
             {
                 Relocs::iterator i, iend;
                 for(i = m_relocs.begin(), iend = m_relocs.end();
@@ -679,22 +679,22 @@ namespace Sora
                 }
             }
 
-            int WINAPI GetPtrLength()
+            int GetPtrLength()
             {
                 return sizeof( ArchTraits<Arch>::UIntPtr );
             }
 
-            int WINAPI GetCount()
+            int GetCount()
             {
                 return m_relocs.size();
             }
 
-            void WINAPI AppendRelocationItem(IRelocatableVar* p)
+            void AppendRelocationItem(IRelocatableVar* p)
             {
                 m_relocs.push_back(p);
             }
 
-            void WINAPI PushToSymbolTable(ISymbolTableBuilder* table)
+            void PushToSymbolTable(ISymbolTableBuilder* table)
             {
                 Relocs::iterator i, iend;
                 for(i = m_relocs.begin(), iend = m_relocs.end();
@@ -728,12 +728,12 @@ namespace Sora
 				m_relocs.clear();
             }
 
-            int WINAPI GetDataLength()
+            int GetDataLength()
             {
                 return m_buf.size() * sizeof(IMAGE_RELOCATION);
             }
 
-            void WINAPI GetRawData(PBYTE p)
+            void GetRawData(PBYTE p)
             {
                 IMAGE_RELOCATION* pData = (IMAGE_RELOCATION*) p;
                 std::copy(m_buf.begin(), m_buf.end(), pData);

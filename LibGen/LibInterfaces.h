@@ -9,10 +9,10 @@ namespace Sora
     {
         public:
             //the name is limited to 14 bytes. No longname is supported.
-            virtual void WINAPI AddObject(LPCSTR szName, ICoffBuilder*) = 0;
+            virtual void AddObject(LPCSTR szName, ICoffBuilder*) = 0;
 
             //call this method to calculate the offset for first and second link member before retrive raw data
-            virtual void WINAPI FillOffsets() = 0;
+            virtual void FillOffsets() = 0;
     };
 };
 

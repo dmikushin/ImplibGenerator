@@ -147,7 +147,7 @@ namespace Sora
             return sizeof(ArchTraits<Arch>::UIntPtr);
         }
 
-        void WINAPI BuildImportDescriptor(LPCSTR szDllName, ICoffBuilder* cb)
+        void BuildImportDescriptor(LPCSTR szDllName, ICoffBuilder* cb)
         {
             IMAGE_IMPORT_DESCRIPTOR iid;
             ZeroMemory(&iid, sizeof(iid));
@@ -188,7 +188,7 @@ namespace Sora
             cb->GetSymbolTableBuilder()->AddSymbol(0, 0, BuildNullThunkName(szDllName), SYST_EXTERN, 0);
         }
 
-        void WINAPI BuildImportThunk(LPCSTR szDllName, LPCSTR szImpName, LPCSTR szFuncName, LPCSTR szDllExpName, WORD nDllExpOrdinal, ICoffBuilder* cb)
+        void BuildImportThunk(LPCSTR szDllName, LPCSTR szImpName, LPCSTR szFuncName, LPCSTR szDllExpName, WORD nDllExpOrdinal, ICoffBuilder* cb)
         {
             std::string lookupSymbol;
 
@@ -286,17 +286,17 @@ namespace Sora
             cb->GetSymbolTableBuilder()->AddSymbol(0, 0, BuildImpDescSymbolName(szDllName), SYST_EXTERN, 0);
         }
 
-        void WINAPI BuildImportByNameThunk(LPCSTR szDllName, LPCSTR szImpName, LPCSTR szFuncName, LPCSTR szDllExpName, ICoffBuilder* cb)
+        void BuildImportByNameThunk(LPCSTR szDllName, LPCSTR szImpName, LPCSTR szFuncName, LPCSTR szDllExpName, ICoffBuilder* cb)
         {
             BuildImportThunk(szDllName, szImpName, szFuncName, szDllExpName, 0, cb);
         }
 
-        void WINAPI BuildImportByOrdinalThunk(LPCSTR szDllName, LPCSTR szImpName, LPCSTR szFuncName, WORD nDllExpOrdinal, ICoffBuilder* cb)
+        void BuildImportByOrdinalThunk(LPCSTR szDllName, LPCSTR szImpName, LPCSTR szFuncName, WORD nDllExpOrdinal, ICoffBuilder* cb)
         {
             BuildImportThunk(szDllName, szImpName, szFuncName, 0, nDllExpOrdinal, cb);
         }
 
-        void WINAPI BuildNullThunk(LPCSTR szDllName, ICoffBuilder* cb)
+        void BuildNullThunk(LPCSTR szDllName, ICoffBuilder* cb)
         {
             ISectionBuilder* ft = cf->CreateSectionBuilder();
             ISectionBuilder* oft = cf->CreateSectionBuilder();
@@ -317,7 +317,7 @@ namespace Sora
             //cb->GetSymbolTableBuilder()->AddSymbol(oft, 0, "NullOriginalThunk", SYST_EXTERN, 0);
         }
 
-        void WINAPI BuildNullDescriptor(ICoffBuilder* cb)
+        void BuildNullDescriptor(ICoffBuilder* cb)
         {
             IMAGE_IMPORT_DESCRIPTOR iid;
             ZeroMemory(&iid, sizeof(iid));
@@ -338,7 +338,7 @@ namespace Sora
     CImpSectionBuilder<Arch> CImpSectionBuilder<Arch>::Instance;
 
     extern "C" {
-        IImpSectionBuilder* WINAPI GetX86ImpSectionBuilder() { return &CImpSectionBuilder<ArchX86>::Instance; }
-        IImpSectionBuilder* WINAPI GetX64ImpSectionBuilder() { return &CImpSectionBuilder<ArchX64>::Instance; }
+        IImpSectionBuilder* GetX86ImpSectionBuilder() { return &CImpSectionBuilder<ArchX86>::Instance; }
+        IImpSectionBuilder* GetX64ImpSectionBuilder() { return &CImpSectionBuilder<ArchX64>::Instance; }
     }
 };

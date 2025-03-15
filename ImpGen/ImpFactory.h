@@ -5,8 +5,8 @@
 
 namespace Sora {
     extern "C" {
-        IImpSectionBuilder* WINAPI GetX86ImpSectionBuilder();
-        IImpSectionBuilder* WINAPI GetX64ImpSectionBuilder();
+        IImpSectionBuilder* GetX86ImpSectionBuilder();
+        IImpSectionBuilder* GetX64ImpSectionBuilder();
     }
 };
 
