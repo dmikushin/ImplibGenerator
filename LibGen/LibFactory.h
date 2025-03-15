@@ -3,9 +3,8 @@
 
 #include "LibInterfaces.h"
 
-namespace Sora
-{
-    extern "C" ILibraryBuilder* CreateLibraryBuilder();
+namespace Sora {
+extern "C" ILibraryBuilder *CreateLibraryBuilder();
 };
 
 #endif

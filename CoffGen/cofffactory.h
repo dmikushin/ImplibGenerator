@@ -4,11 +4,11 @@
 #include "coffInterfaces.h"
 
 namespace Sora {
-    extern "C" {
-        ICoffFactory* GetX86CoffFactory();
-        ICoffFactory* GetX64CoffFactory();
-        ICoffFactory* GetIA64CoffFactory();
-    }
-};
+extern "C" {
+ICoffFactory *GetX86CoffFactory();
+ICoffFactory *GetX64CoffFactory();
+ICoffFactory *GetIA64CoffFactory();
+}
+}; // namespace Sora
 
 #endif

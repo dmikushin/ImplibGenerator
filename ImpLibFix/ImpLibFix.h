@@ -4,12 +4,12 @@
 #include <Windows.h>
 
 namespace Sora {
-    //not include the \0
-    extern "C" int GetMaxNameLength();
+// not include the \0
+extern "C" int GetMaxNameLength();
 
-    //return: how many members renamed.
-    //first link member and second link member and longname member won't be renamed
-    extern "C" int RenameImpLibObjects(LPCSTR szNewName, PBYTE pData, int nDataLen);
-};
+// return: how many members renamed.
+// first link member and second link member and longname member won't be renamed
+extern "C" int RenameImpLibObjects(LPCSTR szNewName, PBYTE pData, int nDataLen);
+}; // namespace Sora
 
 #endif

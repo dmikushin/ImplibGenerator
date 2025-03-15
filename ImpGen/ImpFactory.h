@@ -4,10 +4,10 @@
 #include "ImpInterfaces.h"
 
 namespace Sora {
-    extern "C" {
-        IImpSectionBuilder* GetX86ImpSectionBuilder();
-        IImpSectionBuilder* GetX64ImpSectionBuilder();
-    }
-};
+extern "C" {
+IImpSectionBuilder *GetX86ImpSectionBuilder();
+IImpSectionBuilder *GetX64ImpSectionBuilder();
+}
+}; // namespace Sora
 
 #endif
