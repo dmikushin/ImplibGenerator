@@ -187,7 +187,7 @@ int _tmain(int argc, TCHAR* argv[])
     }
     catch (MyMsgException e)
     {
-        fprintf(stderr, CT2CA(e.fmt), CT2CA(e.msg));
+        _ftprintf(stderr, e.fmt, e.msg);
     }
 
     CoUninitialize();

@@ -7,6 +7,8 @@
 #include <set>
 #include <utility>
 #include <exception>
+#include <string>
+#include <stdexcept>
 
 namespace Sora
 {
@@ -55,7 +57,7 @@ namespace Sora
         public:
             struct StringLesser
             {
-                bool operator()(const std::string& lhs, const std::string& rhs)
+                bool operator()(const std::string& lhs, const std::string& rhs) const
                 {
                     return strcmp(lhs.c_str(), rhs.c_str()) < 0;
                 }
@@ -90,13 +92,13 @@ namespace Sora
 
             void WINAPI AppendMember(ICoffBuilder* member)
             {
-                m_offsets.insert( std::make_pair(member, 0) );
+                m_offsets.emplace( member, 0 );
 
                 ISymbolStrings* sns = member->GetSymbolTableBuilder()->GetPublicSymbolNames();
                 int cnt = sns->GetCount();
                 int i;
-                for(i = 0; i < cnt; ++i)
-                    m_symbols.insert( std::make_pair(std::string(sns->GetString(i)), member) );
+                for (i = 0; i < cnt; ++i)
+                    m_symbols.emplace(sns->GetString(i), member);
 
                 sns->Dispose();
             }
