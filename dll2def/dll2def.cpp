@@ -97,9 +97,9 @@ int cprintf(char* dest, const char* mask, int n) {
 }
 
 // Process a single PE file (DLL) and dump its export
-int parse_pe(const std::string& filename, std::ifstream& hFile, std::ofstream& hOut) {
+int parse_pe(const std::string& filename, std::ifstream& hFile, std::ofstream& hOut, bool compact) {
     char buf[1024], dll_name[80], pub_name[80];
-    int current_mod = MOD_NO, compact = 0;
+    int current_mod = MOD_NO;
     char c, *cur1, *cur2;
     RVA_2_FileOffset export_dir;
     RVA_2_FileOffset_node* sections = nullptr, **current_node = &sections;
@@ -260,12 +260,20 @@ int parse_pe(const std::string& filename, std::ifstream& hFile, std::ofstream& h
 
 int main(int argc, char* argv[]) {
     if (argc < 2) {
-        std::cerr << "USAGE: dll2def file [output]\n";
+        std::cerr << "USAGE: dll2def file [output] [/COMPACT]\n";
         return 1;
     }
 
     std::string filename = argv[1];
-    std::string output_filename = (argc > 2) ? argv[2] : filename + ".def";
+    std::string output_filename = (argc > 2 && argv[2][0] != '/') ? argv[2] : filename + ".def";
+    bool compact = false;
+
+    // Check for /COMPACT switch
+    for (int i = 2; i < argc; ++i) {
+        if (std::strcmp(argv[i], "/COMPACT") == 0) {
+            compact = true;
+        }
+    }
 
     std::ifstream hFile;
     std::ofstream hOut(output_filename);
@@ -275,7 +283,7 @@ int main(int argc, char* argv[]) {
         return ERR_OUTPUT;
     }
 
-    int result = parse_pe(filename, hFile, hOut);
+    int result = parse_pe(filename, hFile, hOut, compact);
     if (result != ERR_OK) {
         std::cerr << "Error: " << error_msgs[result - 1] << "\n";
     }
