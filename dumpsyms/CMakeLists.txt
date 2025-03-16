@@ -1,3 +1,3 @@
-project(dll2def LANGUAGES CXX)
+project(dumpsyms LANGUAGES CXX)
 
 add_executable(${PROJECT_NAME} ${PROJECT_NAME}.cpp)

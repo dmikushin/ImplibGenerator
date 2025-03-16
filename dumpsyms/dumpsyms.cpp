@@ -1,22 +1,36 @@
 /*
- * DLL2DEF source code
+ * DUMPSYMBOLS source code
  * Copyright (c) 2006-2025, Vladimir Kamenar.
  * All rights reserved.
  *
  * This tool is a command-line utility to extract the dynamic-link library
- * symbols in plain text format. DLL2DEF supports both 32 and 64-bit DLL.
+ * symbols in plain text format. DUMPSYMBOLS supports both 32 and 64-bit DLL.
  *
- * The DLL2DEF tool expects a DLL name and the DEF file name, for example:
- * dll2def \windows\system32\kernel32.dll kernel32.def
+ * The DUMPSYMBOLS tool expects a DLL name and an output file name, for example:
+ * DUMPSYMBOLS \windows\system32\kernel32.dll kernel32.txt
  *
- * The DEF file name is optional. If not specified, a DEF-file with the
+ * The output file name is optional. If not specified, a .txt with the
  * same name as the DLL will be generated.
  *
  * Optional switches:
  * /COMPACT - don't include comments with misc information
  *
- * Please, check the user guide for more information:
- * https://implib.sourceforge.io/EN.HTM
+ * The output file uses the following format:
+ * MACRO implib   dllname, cconv, name, thunk, pubname
+ * Parameters:
+ *     dllname  : DLL file name.
+ *     cconv    : Calling convention. Possible values: STDCALL, CDECL
+ *     name     : Symbol name or an ordinal value, prefixed with ord. This value should
+ *                match exactly the required DLL exported symbol.
+ *     thunk    : Optional thunk name. A thunk function consists of a single
+ *                jmp [pubname] instruction. If not specified, 'name' is assumed
+ *                to be the thunk name as well.
+ *     pubname  : Optional public name. This symbolic name allows calling an external
+ *                function directly (not using a thunk). If not specified, 'name'
+ *                prefixed with '__imp_' is used as the pubname.
+ * Examples:
+ *     implib dsound.dll,   ord.1, _DirectSoundCreate@12
+ *     implib kernel32.dll, ExitProcess, _ExitProcess@4, __imp__ExitProcess@4
  */
 
 #include <algorithm>
@@ -265,13 +279,13 @@ int parse_pe(const std::string &filename, std::ifstream &hFile,
 
 int main(int argc, char *argv[]) {
   if (argc < 2) {
-    std::cerr << "USAGE: dll2def file [output] [/COMPACT]\n";
+    std::cerr << "USAGE: DUMPSYMBOLS file [output] [/COMPACT]\n";
     return 1;
   }
 
   std::string filename = argv[1];
   std::string output_filename =
-      (argc > 2 && argv[2][0] != '/') ? argv[2] : filename + ".def";
+      (argc > 2 && argv[2][0] != '/') ? argv[2] : filename + ".txt";
   bool compact = false;
 
   // Check for /COMPACT switch
