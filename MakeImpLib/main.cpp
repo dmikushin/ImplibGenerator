@@ -2,6 +2,7 @@
 #include <iostream>
 #include <fstream>
 #include <nlohmann/json.hpp>
+#include <vector>
 #include <Windows.h>
 
 #include "LibGenHelperFactory.h"
@@ -56,28 +57,20 @@ int main(int argc, char* argv[]) {
       impBuilder->Build();
 
       int nFileSize = impBuilder->GetDataLength();
-      CHandle hFile(CreateFile(argv[2], GENERIC_READ | GENERIC_WRITE, 0, 0, CREATE_ALWAYS, 0, NULL));
-      if ((HANDLE)hFile == INVALID_HANDLE_VALUE)
+      std::vector<char> buffer(nFileSize);
+      impBuilder->GetRawData(reinterpret_cast<PBYTE>(buffer.data()));
+
+      std::ofstream outputFile(argv[2], std::ios::binary);
+      if (!outputFile.is_open()) {
         throw MyMsgException("Fail to create library File!");
+      }
 
-      if (SetFilePointer(hFile, nFileSize, 0, FILE_BEGIN) == INVALID_SET_FILE_POINTER)
-        if (GetLastError() != 0)
-          throw MyMsgException("Can't allocate disk space for output file!");
+      outputFile.write(buffer.data(), nFileSize);
+      if (!outputFile) {
+        throw MyMsgException("Failed to write to output file!");
+      }
 
-      if (SetEndOfFile(hFile) == FALSE)
-        throw MyMsgException("Can't allocate disk space for output file!");
-
-      CHandle hFileMap(CreateFileMapping(hFile, 0, PAGE_READWRITE, 0, nFileSize, 0));
-      if ((HANDLE)hFileMap == NULL)
-        throw MyMsgException("Can't map output file for writing!");
-
-      LPVOID pFile = MapViewOfFile(hFileMap, FILE_MAP_WRITE, 0, 0, 0);
-      if (pFile == 0)
-        throw MyMsgException("Can't map output file for writing!");
-
-      impBuilder->GetRawData((PBYTE)pFile);
       impBuilder->Dispose();
-      UnmapViewOfFile(pFile);
     } else {
       std::cout << "Make import library from JSON\n"
                 << "using: MakeImpLib <input json> <output lib>\n";
