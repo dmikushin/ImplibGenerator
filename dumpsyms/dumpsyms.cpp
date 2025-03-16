@@ -93,8 +93,8 @@ uint32_t do_RVA_2_FileOffset(RVA_2_FileOffset_node *sections, uint32_t RVA) {
 // Process a single PE file (DLL) and dump its export
 int parse_pe(const std::string &filename, std::ifstream &hFile,
              std::ofstream &hOut, bool compact) {
-  fs::path dll_path(filename);
-  std::string dll_name = dll_path.stem().string();
+  std::string dll_path = fs::path(filename).filename().string();
+  std::string dll_name = fs::path(filename).stem().string();
   char buf[1024], pub_name[80];
   int current_mod = MOD_NO;
   char c;
@@ -265,7 +265,7 @@ int parse_pe(const std::string &filename, std::ifstream &hFile,
     }
 
     hOut << "implib ";
-    hOut << filename;
+    hOut << dll_path;
     if (current_mod != MOD_NO) {
       hOut << ", STDCALL, 0, ";
     } else {

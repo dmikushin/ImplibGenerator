@@ -193,7 +193,7 @@ def parse_pe(filename, compact):
                         buf = hFile.read(512).split(b'\x00', 1)[0].decode()
                         output += f"; -> {buf}\n"
 
-                output += f"implib {filename}, {pub_name}\n"
+                output += f"implib {Path(filename).name}, {pub_name}\n"
 
             return output
 
