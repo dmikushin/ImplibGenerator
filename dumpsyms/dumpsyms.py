@@ -33,7 +33,7 @@ Example JSON output:
     {
       "cconv": "STDCALL",
       "name": "_ExitProcess@4",
-      "ord": "ord.1",
+      "ord": 1,
       "thunk": "_ExitProcess@4",
       "pubname": "__imp__ExitProcess@4"
     }
@@ -186,7 +186,8 @@ def parse_pe(filename, compact):
                 ordinal = struct.unpack_from('<H', hFile.read(2))[0]
                 ordinals_array += 2
 
-                ord_name = f"ord.{ordinal + ordinal_base}"
+                ord_val = ordinal + ordinal_base
+                ord_name = f"ord.{ord_val}"
 
                 if not pub_name:
                     pub_name = ord_name
@@ -212,7 +213,7 @@ def parse_pe(filename, compact):
                 symbol_data = {
                     "cconv": "STDCALL",
                     "name": pub_name,
-                    "ord" : ord_name,
+                    "ord" : ord_val,
                     "thunk": pub_name,
                     "pubname": f"__imp_{pub_name}"
                 }
