@@ -27,6 +27,9 @@
 #include <sstream>
 #include <string>
 #include <vector>
+#include <filesystem>
+
+namespace fs = std::filesystem;
 
 // Error codes
 enum ERR_CODES {
@@ -76,9 +79,11 @@ uint32_t do_RVA_2_FileOffset(RVA_2_FileOffset_node *sections, uint32_t RVA) {
 // Process a single PE file (DLL) and dump its export
 int parse_pe(const std::string &filename, std::ifstream &hFile,
              std::ofstream &hOut, bool compact) {
-  char buf[1024], dll_name[80], pub_name[80];
+  fs::path dll_path(filename);
+  std::string dll_name = dll_path.stem().string();
+  char buf[1024], pub_name[80];
   int current_mod = MOD_NO;
-  char c, *cur1, *cur2;
+  char c;
   std::stringstream ss;
   RVA_2_FileOffset export_dir;
   RVA_2_FileOffset_node *sections = nullptr, **current_node = &sections;
