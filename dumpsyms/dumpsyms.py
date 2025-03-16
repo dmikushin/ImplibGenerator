@@ -4,34 +4,43 @@ Copyright (c) 2006-2025, Vladimir Kamenar.
 All rights reserved.
 
 This tool is a command-line utility to extract the dynamic-link library
-symbols in plain text format. DUMPSYMBOLS supports both 32 and 64-bit DLL.
+symbols in JSON format. DUMPSYMBOLS supports both 32 and 64-bit DLLs.
 
 The DUMPSYMBOLS tool expects a DLL name and an output file name, for example:
-DUMPSYMBOLS \windows\system32\kernel32.dll kernel32.txt
+DUMPSYMBOLS \windows\system32\kernel32.dll kernel32.json
 
-The output file name is optional. If not specified, a .txt with the
+The output file name is optional. If not specified, a .json file with the
 same name as the DLL will be generated.
 
 Optional switches:
 /COMPACT - don't include comments with misc information
 
-The output file uses the following format:
-MACRO implib   dllname, cconv, name, thunk, pubname
-Parameters:
-    dllname  : DLL file name.
-    cconv    : Calling convention. Possible values: STDCALL, CDECL
-    name     : Symbol name or an ordinal value, prefixed with ord. This value should
-               match exactly the required DLL exported symbol.
-    thunk    : Optional thunk name. A thunk function consists of a single
-               jmp [pubname] instruction. If not specified, 'name' is assumed
-               to be the thunk name as well.
-    pubname  : Optional public name. This symbolic name allows calling an external
-               function directly (not using a thunk). If not specified, 'name'
-               prefixed with '__imp_' is used as the pubname.
-Examples:
-    implib dsound.dll,   ord.1, _DirectSoundCreate@12
-    implib kernel32.dll, ExitProcess, _ExitProcess@4, __imp__ExitProcess@4
+The output JSON structure includes:
+- dllname: The name of the DLL.
+- arch: Architecture (32 or 64-bit).
+- symbols: A list of symbols, each containing:
+  - cconv: Calling convention (STDCALL).
+  - name: Symbol name or ordinal value.
+  - ord: Ordinal name.
+  - thunk: Thunk name.
+  - pubname: Public name.
+
+Example JSON output:
+{
+  "dllname": "kernel32.dll",
+  "arch": 64,
+  "symbols": [
+    {
+      "cconv": "STDCALL",
+      "name": "_ExitProcess@4",
+      "ord": "ord.1",
+      "thunk": "_ExitProcess@4",
+      "pubname": "__imp__ExitProcess@4"
+    }
+  ]
+}
 """
+import json
 import struct
 import os
 import sys
@@ -97,8 +106,12 @@ def parse_pe(filename, compact):
                 if aux == 0x20B:
                     is_pe32plus = 1
 
-            # DEF header
-            output = f"include 'implib{'64' if x64 else ''}.inc'\n\n"
+            # Initialize JSON structure
+            json_output = {
+                "dllname": Path(filename).name,
+                "arch": 64 if x64 else 32,
+                "symbols": []
+            }
 
             aux = 0x78 if is_pe32plus else 0x68
             if size_of_optional_header < aux:
@@ -173,11 +186,13 @@ def parse_pe(filename, compact):
                 ordinal = struct.unpack_from('<H', hFile.read(2))[0]
                 ordinals_array += 2
 
+                ord_name = f"ord.{ordinal + ordinal_base}"
+
                 if not pub_name:
-                    pub_name = f"ord.{ordinal + ordinal_base}"
+                    pub_name = ord_name
 
                 if not compact:
-                    output += f"; {Path(filename).stem}.{pub_name} ord.{ordinal + ordinal_base}\n"
+                    print(f"{Path(filename).stem}.{pub_name} ord.{ordinal + ordinal_base}")
 
                     # Get the symbol's RVA (just to check if it's a forwarder chain)
                     if ordinal & 0x80000000:
@@ -191,11 +206,20 @@ def parse_pe(filename, compact):
                             return ERR_CODES['ERR_BAD_FORMAT']
                         hFile.seek(file_pos, os.SEEK_SET)
                         buf = hFile.read(512).split(b'\x00', 1)[0].decode()
-                        output += f"; -> {buf}\n"
+                        print(f"  -> {buf}")
 
-                output += f"implib {Path(filename).name}, {pub_name}\n"
 
-            return output
+                symbol_data = {
+                    "cconv": "STDCALL",
+                    "name": pub_name,
+                    "ord" : ord_name,
+                    "thunk": pub_name,
+                    "pubname": f"__imp_{pub_name}"
+                }
+
+                json_output["symbols"].append(symbol_data)
+
+            return json_output
 
     except FileNotFoundError:
         return ERR_CODES['ERR_FILE_NOT_FOUND']
@@ -218,8 +242,7 @@ def main():
         return result
 
     with open(output_filename, 'w') as hOut:
-        hOut.write(result)
-        hOut.write("\nendlib\n")
+        json.dump(result, hOut, indent=2)
 
     return 0
 
