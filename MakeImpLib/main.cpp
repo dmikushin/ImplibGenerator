@@ -1,3 +1,35 @@
+/**
+ * This program generates an import library from a JSON configuration file.
+ * 
+ * Usage:
+ *   MakeImpLib <input json> <output lib>
+ * 
+ * The input JSON structure includes:
+ * - dllname: The name of the DLL.
+ * - arch: Architecture (32 or 64-bit).
+ * - symbols: A list of symbols, each containing:
+ *   - cconv: Calling convention (e.g., STDCALL).
+ *   - name: Symbol name or ordinal value.
+ *   - ord: Ordinal name.
+ *   - thunk: Thunk name.
+ *   - pubname: Public name.
+ * 
+ * Example JSON input:
+ * {
+ *   "dllname": "kernel32.dll",
+ *   "arch": 64,
+ *   "symbols": [
+ *     {
+ *       "cconv": "STDCALL",
+ *       "name": "_ExitProcess@4",
+ *       "ord": 1,
+ *       "thunk": "_ExitProcess@4",
+ *       "pubname": "__imp__ExitProcess@4"
+ *     }
+ *   ]
+ * }
+ */
+
 #include <cstdlib>
 #include <iostream>
 #include <fstream>
