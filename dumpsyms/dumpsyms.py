@@ -234,7 +234,7 @@ def main():
         return 1
 
     filename = sys.argv[1]
-    output_filename = sys.argv[2] if len(sys.argv) > 2 and not sys.argv[2].startswith('/') else f"{filename}.txt"
+    output_filename = sys.argv[2] if len(sys.argv) > 2 and not sys.argv[2].startswith('/') else f"{filename}.json"
     compact = '/COMPACT' in sys.argv
 
     result = parse_pe(filename, compact)
